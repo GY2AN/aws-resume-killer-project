@@ -1,68 +1,141 @@
-# AWS Resume Killer Project
+# 🚀 AWS 3-Tier Highly Available Architecture
 
-## Overview
-A highly available, secure, and scalable three-tier web application built on AWS.
+## 📌 Project Overview
 
-## Architecture
-- VPC with public and private subnets
-- Application Load Balancer
-- EC2 Auto Scaling Group
-- RDS (Multi-AZ)
-- CloudFront + S3
-- CloudWatch monitoring
+This project demonstrates the design and deployment of a **highly available, scalable, and secure 3-tier web application architecture on AWS**.
+
+A Flask backend application is deployed on EC2 instances inside private subnets, connected to an Amazon RDS database. Traffic is routed through an Application Load Balancer and scales automatically based on CPU utilization.
+
+This project reflects real-world cloud architecture practices used in production environments.
+
+---
+
+# 🏗️ Architecture Diagram
 
 ```mermaid
 flowchart TB
 
-    %% Internet
     Internet((Internet))
 
-    %% VPC Boundary
     subgraph VPC["Custom VPC (10.0.0.0/16)"]
 
-        %% Public Subnets
-        subgraph Public["Public Subnets (AZ-a & AZ-b)"]
+        subgraph Public["Public Subnets"]
             ALB[Application Load Balancer]
             NAT[NAT Gateway]
         end
 
-        %% Private Subnets
-        subgraph Private["Private Subnets (AZ-a & AZ-b)"]
-            
-            subgraph ASG["Auto Scaling Group"]
-                EC2A[EC2 Instance - Flask App]
-                EC2B[EC2 Instance - Flask App]
-            end
-            
-            RDS[(Amazon RDS<br/>Multi-AZ)]
+        subgraph Private["Private Subnets"]
+            ASG[Auto Scaling Group]
+            EC2[EC2 - Flask Backend]
+            RDS[(Amazon RDS - Multi AZ)]
         end
 
         SSM[SSM Parameter Store]
         CW[CloudWatch Monitoring]
-
     end
 
-    %% Traffic Flow
     Internet --> ALB
-    ALB --> EC2A
-    ALB --> EC2B
+    ALB --> ASG
+    ASG --> EC2
+    EC2 --> RDS
 
-    %% App to DB
-    EC2A --> RDS
-    EC2B --> RDS
-
-    %% Outbound Internet Access
-    EC2A --> NAT
-    EC2B --> NAT
+    EC2 --> NAT
     NAT --> Internet
 
-    %% Secrets Access
-    EC2A --> SSM
-    EC2B --> SSM
-
-    %% Monitoring
-    EC2A --> CW
-    EC2B --> CW
-    ALB --> CW
+    EC2 --> SSM
+    EC2 --> CW
 ```
 
+---
+
+# 🧱 AWS Services Used
+
+- Amazon VPC (Custom networking)
+- Public & Private Subnets (Multi-AZ)
+- Internet Gateway
+- NAT Gateway
+- Application Load Balancer (ALB)
+- EC2 (Amazon Linux 2023)
+- Auto Scaling Group
+- Amazon RDS (Multi-AZ, Private)
+- IAM Roles
+- AWS Systems Manager Parameter Store
+- CloudWatch (Monitoring & Alarms)
+
+---
+
+# 🔐 Security Implementation
+
+- No EC2 instance has a public IP
+- RDS deployed in private subnet only
+- Security Groups restrict traffic by source
+- Database credentials stored securely in SSM Parameter Store
+- IAM role used instead of hardcoded credentials
+- Application accessible only via ALB
+
+---
+
+# ⚙️ Application Details
+
+Backend: Flask (Python)  
+Port: 5000  
+
+### API Endpoints
+
+| Method | Endpoint | Purpose |
+|--------|----------|---------|
+| GET    | /health  | Health check |
+| POST   | /submit  | Insert data into DB |
+| GET    | /fetch   | Retrieve stored records |
+
+---
+
+# 📈 High Availability & Scaling
+
+- Auto Scaling Group deployed across multiple Availability Zones
+- Target Tracking Scaling Policy (50% CPU utilization)
+- CloudWatch alarm triggers when CPU > 70%
+- Load Balancer performs health checks using `/health`
+
+---
+
+# 🚀 Deployment Highlights
+
+- Infrastructure manually designed using AWS Console
+- Launch Template with automated user-data bootstrapping
+- Virtual environment setup for backend
+- Secure secret retrieval using SSM
+- Private subnet architecture with NAT for outbound internet
+
+---
+
+# 🧠 Key Learning Outcomes
+
+- Deep understanding of VPC networking and routing
+- NAT Gateway and private subnet configuration
+- IAM role-based secure secret management
+- Auto Scaling and Load Balancer integration
+- Production-style monitoring with CloudWatch
+- Debugging real cloud infrastructure issues
+
+---
+
+# 🏆 Resume Summary
+
+Designed and deployed a production-ready 3-tier AWS architecture using VPC, Auto Scaling Group, Application Load Balancer, and RDS (Multi-AZ). Implemented secure secret management with SSM Parameter Store and configured CPU-based Auto Scaling with CloudWatch monitoring.
+
+---
+
+# 🔮 Future Improvements
+
+- HTTPS with AWS Certificate Manager
+- CI/CD pipeline (GitHub Actions)
+- Docker containerization
+- Infrastructure as Code (Terraform)
+
+---
+
+# 👤 Author
+
+Gyan Prakash  
+Cloud & DevOps Enthusiast
